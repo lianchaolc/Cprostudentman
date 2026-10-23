@@ -1,0 +1,19 @@
+# 编译生成的程序
+*.exe
+*.o
+*.a
+*.def
+
+# dll库文件（不提交二进制库）
+*.dll
+
+# IDE、系统缓存
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# 临时文档
+*.md
+!建表.sql
