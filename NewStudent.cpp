@@ -57,6 +57,8 @@ void menu()
     cout << "\n==== MySQL学生管理系统 ====" << endl;
     cout << "1 添加学生" << endl;
     cout << "2 查看全部学生" << endl;
+     cout << "3 删除学生" << endl;
+      cout << "4 修改学生" << endl;
     cout << "0 退出程序" << endl;
     cout << "请输入选择：";
 }
@@ -114,12 +116,92 @@ void showAll()
     }
     mysql_free_result(res);
 }
+ ///删除特定的人传id
+void deleteStu()
+{
+    int id;   // ✅ 先定义id
+    cout << "输入学号：";
+    cin >> id;
+    MYSQL_RES *res;
+    MYSQL_ROW row;
 
+    // id是int数字，不加单引号，全部使用英文半角空格
+    char sql[256];
+    sprintf(sql, "DELETE FROM student WHERE id=%d", id);
+
+    int ret = mysql_query(mysql, sql);
+    if(ret != 0)
+    {
+        cout << "❌ 删除失败：" << mysql_error(mysql) << endl;
+       // mysql_rollback(mysql);
+    }
+    else
+    {
+        // mysql_affected_rows 获取本次SQL影响行数
+        if(mysql_affected_rows(mysql) == 0)
+        {
+            cout << "⚠️ 该学号不存在，没有数据被删除！" << endl;
+        }
+        else
+        {
+            mysql_commit(mysql); // 事务提交
+            cout << "✅ 删除成功，事务已提交" << endl;
+        }
+    }
+///  更改学生编号
+ void updateStudent(){
+
+int id, age;
+    char name[50];
+
+    cout << "输入要修改的学号：";
+    cin >> id;
+    cout << "输入新姓名：";
+    cin >> name;
+    cout << "输入新年龄：";
+    cin >> age;
+
+    char sql[256];
+    // 查询
+    snprintf(sql, sizeof(sql), "select * from student where id = %d", id);
+    int ret = mysql_query(mysql, sql);
+    if (ret != 0)
+    {
+        cout << "❌ 查询失败：" << mysql_error(mysql) << endl;
+        return;
+    }
+    MYSQL_RES *res = mysql_store_result(mysql);
+    if (mysql_num_rows(res) == 0)
+    {
+        cout << "❌ 学号不存在，不能修改！" << endl;
+        mysql_free_result(res);
+        return;
+    }
+    mysql_free_result(res);
+
+    // 更新
+    snprintf(sql, sizeof(sql), "update student set name='%s',age=%d where id=%d", name, age, id);
+    ret = mysql_query(mysql, sql);
+    if (ret == 0)
+    {
+        cout << "✅ 修改成功" << endl;
+    }
+    else
+    {
+        cout << "❌ 修改失败：" << mysql_error(mysql) << endl;
+    }
+
+
+ 
+
+
+}
 int main()
 {
+    cout << "==== 程序启动 ====" << endl;
   SetConsoleOutputCP(CP_UTF8);
 SetConsoleCP(CP_UTF8);
-
+cout << "编码设置完成" << endl;
     if (!connectDB())
     {
         system("pause"); // 加这一行！失败就停住，看文字
@@ -138,6 +220,14 @@ SetConsoleCP(CP_UTF8);
             case 2:
                 showAll();
                 break;
+            case 3:
+            //删除特定
+            deleteStu();
+             break;
+            case 4:
+           updateStudent();
+            break;
+        
             case 0:
                 mysql_close(mysql);
                 cout << "程序退出" << endl;
