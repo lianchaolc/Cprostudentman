@@ -19,7 +19,7 @@ using namespace std;
 // 剩下的原有代码保持不变
 
 #include <windows.h>
-
+#include <limits>   // 必须这个头文件
 MYSQL* mysql;
 const string host = "127.0.0.1";
 const string user = "root";
@@ -40,7 +40,8 @@ bool connectDB()
         cout << "X 数据库连接失败：" << mysql_error(mysql) << endl;
         return false;
     }
-    int charRet = mysql_set_character_set(mysql, "utf8");
+    int charRet = mysql_set_character_set(mysql, "utf8mb4");
+
     if(charRet != 0)
     {
         cout << "字符集设置失败：" << mysql_error(mysql) << endl;
@@ -70,16 +71,17 @@ void addStu()
     cout << "输入学号：";
     cin >> id;
     cout << "输入姓名：";
-    cin >> name;
+   cin.ignore();   // 吃掉学号输入后的回车
+   fgets(name, 50, stdin);
     cout << "输入年龄：";
     cin >> age;
 char sql[256];
 
-cout << "✅ 添加成功id="+age << endl;
+
 // ✅ 正确，用 << 拼接
-cout << "✅ 添加成功id=" << age << endl;
-
-
+cout << "✅ 添加成功id=" << id << endl;
+cout << "✅ 添加成功name=" << name << endl;
+cout << "✅ 添加成功age=" << age << endl;
     sprintf(sql, "insert into student(id,name,age) values(%d,'%s',%d)", id, name, age);
     int ret = mysql_query(mysql, sql);
     if (ret == 0)
@@ -148,6 +150,7 @@ void deleteStu()
             cout << "✅ 删除成功，事务已提交" << endl;
         }
     }
+     }
 ///  更改学生编号
  void updateStudent(){
 
@@ -192,15 +195,24 @@ int id, age;
     }
 
 
- 
 
 
+
+}
+
+// 处理cin输入错误的工具函数
+void clearCinError()
+{
+    // 重置错误状态位
+    cin.clear();
+    // 清空缓冲区，丢弃所有字符直到换行符
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 int main()
 {
     cout << "==== 程序启动 ====" << endl;
   SetConsoleOutputCP(CP_UTF8);
-SetConsoleCP(CP_UTF8);
+  SetConsoleCP(CP_UTF8);
 cout << "编码设置完成" << endl;
     if (!connectDB())
     {
@@ -212,6 +224,12 @@ cout << "编码设置完成" << endl;
     {
         menu();
         cin >> choice;
+        if (!cin)
+    {
+        cout << "❌ 请输入数字！" << endl;
+        clearCinError();
+        continue;
+    }
         switch (choice)
         {
             case 1:
